@@ -3,7 +3,6 @@
 
 #Aitana Belda VF013 Scripts II
 
-from curses import window
 import maya.cmds as cmds
 
 
@@ -90,7 +89,7 @@ class MyWindow:
     def create(self):
         if cmds.window(self.window_id, exists=True):
             cmds.deleteUI(self.window_id)
-        
+
         self.widgets['mainWindow'] = cmds.window(
             self.window_id,
             title= self.window_title,
@@ -100,5 +99,31 @@ class MyWindow:
             toolbox = True
         )
 
-        cmds.showWindow(self.widgets['window'])
+        #entre aquí y el show window metemos todos los elementos de la ui
+
+        #MAIN LAYOUT
+
+        self.widgets['mainLayout'] = cmds.columnLayout(adjustableColumn=True)
+
+        cmds.rowColumnLayout(nc=1, columnWidth=(1,100))
+        separator = cmds.separator()
+        cmds.setParent('..')
+
+        #SLIDER
+
+        self.widgets['slider'] = cmds.colorIndexSliderGrp (
+            label= 'Color Slider:',
+            min=0,
+            max=31,
+            value=0,
+            cw3 = (100, 30, 72),
+            enable = True
+        )
+
+        cmds.showWindow(self.widgets['mainWindow'])
+
+
+
+windowcm = MyWindow()
+
 
