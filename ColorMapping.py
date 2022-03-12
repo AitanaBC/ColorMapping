@@ -3,13 +3,14 @@
 
 #Aitana Belda VF013 Scripts II
 
+from curses import window
 import maya.cmds as cmds
 
 
 #DICTIONARY
 class ColorMapping(dict):
     def __init__(self):
-        self[data] = {
+        self['data'] = {
             'gray':[0,(0.4,0.4,0.4)],
             'black':[1,(0,0,0)],
             'darkGray':[2,(.35,.35,.35)],
@@ -43,3 +44,61 @@ class ColorMapping(dict):
             'darkViolet':[30,(.36,.07,.57)],
             'eggPlant':[31,(.57,.11,.34)]
             }
+
+
+#creamos methods para recoger los diferentes valores del diccionario
+    def get_rgb_from_name(self, name):
+        return self['data'][name][1]
+
+    def get_index_from_name(self, name):
+        return self['data'][name][0]
+
+    def get_rgb_from_index(self, index):
+        for c, data in self['data'].items():
+            if data[0] == index:
+                return data[1]
+
+    def get_color_from_index(self, index):
+        for c, data in self ['data'].items():
+            if data[0]== index:
+                return c
+
+#estamos usando el primer item del diccionario (el index) en el lambda para ordenar la lista que devuelva el method
+#lambda va con el sorted, es una manera entre otras de ordenar
+    def get_all_color_names(self):
+        return [
+        k
+        for k,v in sorted(self['data'].items(),
+        key=lambda item: item[1] )
+        ]
+
+#INTERFACES are the perfect place to use classes, empezamos definiendo la class de la ventana para el colormapper
+
+class MyWindow:
+    def __init__(self):
+        self.window_title = 'Color Mapper UI'
+        self.window_id = 'colorMapperUI'
+
+        #creamos el dict donde ir metiendo todos los elementos de la ui
+
+        self.widgets = dict()
+
+        #este create lo usamos para ejecutar el method que viene ahora, como __init__ se ejecuta siempre este también se ejecutará siempre
+        self.create()
+
+    #este method es para el lio de crear y borrar la ventana cada vez
+    def create(self):
+        if cmds.window(self.window_id, exists=True):
+            cmds.deleteUI(self.window_id)
+        
+        self.widgets['mainWindow'] = cmds.window(
+            self.window_id,
+            title= self.window_title,
+            sizeable = True,
+            mnb = False,
+            mxb = False,
+            toolbox = True
+        )
+
+        cmds.showWindow(self.widgets['window'])
+
