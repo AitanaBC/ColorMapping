@@ -3,8 +3,8 @@
 
 #Aitana Belda VF013 Scripts II
 
-from setuptools import Command
 import maya.cmds as cmds
+from functools import partial
 
 
 #DICTIONARY
@@ -156,16 +156,43 @@ class MyWindow:
         cmds.showWindow(self.widgets['mainWindow'])
 
 
-    def on_button_press(self, buttonIndex, *args, **kwargs):
 
-        selectedControls = cmds.ls(sl=True, shapes=True)
+
+
+
+    def on_button_press(self, buttonIndex, buttonColor, *args, **kwargs):
+
+        selectedControls = cmds.ls(sl=True)
 
         for s in selectedControls:
-            cmds.setAttr('{.useOutlinerColor}'.format(s), True)
-            cmds.setAttr('{.outlinerColor}'.format(s), buttonIndex)
+            cmds.setAttr('{}.useOutlinerColor'.format(s), True)
+            cmds.setAttr('{}.outlinerColor'.format(s), buttonColor[0], buttonColor[1], buttonColor[2])
 
             cmds.setAttr('{}.overrideEnabled'.format(s), True)
             cmds.setAttr('{}.overrideColor'.format(s), buttonIndex)
+
+
+
+
+
+
+    def on_rClic_SHAPE_press(self, buttonIndex, *args, **kwargs):
+
+        selectedControls = cmds.ls(sl=True)
+
+        for s in selectedControls:
+            cmds.setAttr('{}.overrideEnabled'.format(s), True)
+            cmds.setAttr('{}.overrideColor'.format(s), buttonIndex)
+
+
+    def on_rClic_OUTLINER_press(self, buttonColor, *args, **kwargs):
+
+        selectedControls = cmds.ls(sl=True)
+
+        for s in selectedControls:
+            cmds.setAttr('{}.useOutlinerColor'.format(s), True)
+            cmds.setAttr('{}.outlinerColor'.format(s), buttonColor[0], buttonColor[1], buttonColor[2])
+
 
 
     def populate_buttons(self):
@@ -173,6 +200,7 @@ class MyWindow:
         #botones en orden usamos el lambda el el ColorMapping(get_all_color_names)
         for colorName in self.colors.get_all_color_names():
             index = self.colors.get_index_from_name(colorName)
+            colorOutliner = self.colors.get_rgb_from_index(index)
             cmds.button(
                 l= ' ',
                 bgc = self.colors.get_rgb_from_index(index),
@@ -181,8 +209,18 @@ class MyWindow:
 
 
                 #BUTTON PRESS
-                command = partial(on_button_press, index)
+                command = partial(self.on_button_press, index, colorOutliner)
             )
+            cmds.popupMenu()
+            cmds.menuItem(
+                label= 'Apply only to SHAPE',
+                command = partial(self.on_rClic_SHAPE_press, index)
+            )
+            cmds.menuItem(
+                label= 'Apply only to OUTLINER',
+                command = partial(self.on_rClic_OUTLINER_press, colorOutliner)
+            )
+
 
 windowcm = MyWindow()
 
