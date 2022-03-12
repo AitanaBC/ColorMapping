@@ -3,6 +3,7 @@
 
 #Aitana Belda VF013 Scripts II
 
+from setuptools import Command
 import maya.cmds as cmds
 
 
@@ -154,8 +155,21 @@ class MyWindow:
 
         cmds.showWindow(self.widgets['mainWindow'])
 
+
+    def on_button_press(self, buttonIndex, *args, **kwargs):
+
+        selectedControls = cmds.ls(sl=True, shapes=True)
+
+        for s in selectedControls:
+            cmds.setAttr('{.useOutlinerColor}'.format(s), True)
+            cmds.setAttr('{.outlinerColor}'.format(s), buttonIndex)
+
+            cmds.setAttr('{}.overrideEnabled'.format(s), True)
+            cmds.setAttr('{}.overrideColor'.format(s), buttonIndex)
+
+
     def populate_buttons(self):
-        #los diccionarios no tienen orden de entradas, así que para que salgan los 
+        #los diccionarios no tienen orden de entradas, así que para que salgan los
         #botones en orden usamos el lambda el el ColorMapping(get_all_color_names)
         for colorName in self.colors.get_all_color_names():
             index = self.colors.get_index_from_name(colorName)
@@ -163,9 +177,16 @@ class MyWindow:
                 l= ' ',
                 bgc = self.colors.get_rgb_from_index(index),
                 h=35,
-                w=35
+                w=35,
+
+
+                #BUTTON PRESS
+                command = partial(on_button_press, index)
             )
 
 windowcm = MyWindow()
+
+
+
 
 
