@@ -73,10 +73,24 @@ class ColorMapping(dict):
 
 #INTERFACES are the perfect place to use classes, empezamos definiendo la class de la ventana para el colormapper
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 class MyWindow:
     def __init__(self):
         self.window_title = 'Color Mapper UI'
         self.window_id = 'colorMapperUI'
+        self.colors = ColorMapping()
 
         #creamos el dict donde ir metiendo todos los elementos de la ui
 
@@ -84,6 +98,14 @@ class MyWindow:
 
         #este create lo usamos para ejecutar el method que viene ahora, como __init__ se ejecuta siempre este también se ejecutará siempre
         self.create()
+
+
+
+
+
+
+
+
 
     #este method es para el lio de crear y borrar la ventana cada vez
     def create(self):
@@ -96,18 +118,12 @@ class MyWindow:
             sizeable = True,
             mnb = False,
             mxb = False,
-            toolbox = True
+            toolbox = True,
+            widthHeight = (300,200)
         )
 
         #entre aquí y el show window metemos todos los elementos de la ui
-
-        #MAIN LAYOUT
-
-        self.widgets['mainLayout'] = cmds.columnLayout(adjustableColumn=True)
-
-        cmds.rowColumnLayout(nc=1, columnWidth=(1,100))
-        separator = cmds.separator()
-        cmds.setParent('..')
+        cmds.frameLayout('')
 
         #SLIDER
 
@@ -116,13 +132,39 @@ class MyWindow:
             min=0,
             max=31,
             value=0,
-            cw3 = (100, 30, 72),
+            cw3 = (65, 30, 72),
             enable = True
         )
 
+
+        #BUTTONS
+        #creamos los botones usando la ColorMapping class que teníamos de antes,
+        # le pasamos una variable self llamada self.colors al init de myWindow
+        #que ejecute ColorMapping, en concreto el method get all color names, que ya nos los da ordenados
+        #la función la metemos fuera del create, va aparte.
+        cmds.setParent('..')
+
+        self.widgets['shelfLayout_buttons'] = cmds.shelfLayout(
+            spacing=1,
+        )
+        #Populate buttons function at the end of Create function
+        self.populate_buttons()
+
+        #FIN DE LOS UI ELEMENTS
+
         cmds.showWindow(self.widgets['mainWindow'])
 
-
+    def populate_buttons(self):
+        #los diccionarios no tienen orden de entradas, así que para que salgan los 
+        #botones en orden usamos el lambda el el ColorMapping(get_all_color_names)
+        for colorName in self.colors.get_all_color_names():
+            index = self.colors.get_index_from_name(colorName)
+            cmds.button(
+                l= ' ',
+                bgc = self.colors.get_rgb_from_index(index),
+                h=35,
+                w=35
+            )
 
 windowcm = MyWindow()
 
