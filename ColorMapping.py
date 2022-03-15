@@ -264,34 +264,79 @@ class MyWindow:
     
     
     
+
+    def setCustomColor_OUTLINER(self, value, *args):
+        selection = cmds.ls(sl=True)                     
+
+        for s in selection:
+            cmds.setAttr('{}.useOutlinerColor'.format(s), True)
+            cmds.setAttr('{}.outlinerColor'.format(s), value[0], value[1], value[2])
+            
+    def setCustomColor_VIEWPORT(self, value, *args):
+        selection = cmds.ls(sl=True) 
+        i = 0
+    
+        # CHANGE SHAPE COLOR
+        for obj in selection:
+            # Verify and save the shapes in a list
+            if cmds.nodeType(selection[i]) == "transform":
+                shapeList = cmds.listRelatives(selection[i], c=1, s=1, f=1)
+            else:
+                shapeList.append(selection[i])
+            # Change the selected shapes colors
+            for shape in shapeList:
+                cmds.setAttr("{}.overrideEnabled".format(shape), True)
+                cmds.setAttr("{}.overrideRGBColors".format(shape), True)
+                cmds.setAttr("{}.overrideColorR".format(shape), value[0])
+                cmds.setAttr("{}.overrideColorG".format(shape), value[1])
+                cmds.setAttr("{}.overrideColorB".format(shape), value[2])
+            i = i + 1        
+
+    def setCustomColor_SINGLEPRESS(self, value, *args):
+        self.setCustomColor_OUTLINER(value)
+        self.setCustomColor_VIEWPORT(value)
     
     
     
     
     
-    
-    def saveColor(ml, slider, *args):
-       '''This function saves the current value of the RGB slider and creates 
-       a new set of buttons to apply or delete it.
-       @ml(str): String with the full name of the main layout to parent the 
+    def saveColor(self, ml, slider, *args):
+        '''This function saves the current value of the RGB slider and creates 
+        a new set of buttons to apply or delete it.
+        @ml(str): String with the full name of the main layout to parent the 
                  custom color buttons.
-       @slider(str): String with the full name of the RGB Color slider.
-       '''
+        @slider(str): String with the full name of the RGB Color slider.
+        '''
        
-       # Get the slider's value         
-       value = cmds.colorSliderGrp(slider, query=True, rgb=True)
+        # Get the slider's value         
+        value = cmds.colorSliderGrp(slider, query=True, rgb=True)
        
-       # Create the button set layout
-       parent=ml 
-       customColLay = cmds.rowLayout(nc=2, cw2=(20, 600), cal=(2, "left"), 
+        # Create the button set layout
+        parent=ml 
+        customColLay = cmds.rowLayout(nc=2, cw2=(20, 600), cal=(2, "left"), 
                     parent=ml)
-       cmds.text(l="", al=("left"))
-       savedClrsLayout = cmds.rowLayout(nc=3, cw=(23, 23), cal=(2, "right"))
-       colorButton = cmds.button(l="", h=20, w=100, bgc=value)
-       colorButton = cmds.button(l="Apply", h=20, w=50, 
-                   c=partial(setRGBColor, value))
-       colorButton = cmds.button(l="Delete", h=20, w=50, 
-                    c=partial(delCustomColor, customColLay))
+        cmds.text(l="", al=("left"))
+        savedClrsLayout = cmds.rowLayout(nc=3, cw=(23, 23), cal=(2, "right"))
+        colorButton = cmds.button(l="", h=20, w=100, bgc=value)
+        self.widgets['customColorApplyButton'] = cmds.button(l="Apply", h=20, w=50, 
+                   
+                   
+                   c=partial(self.setCustomColor_SINGLEPRESS, value))
+       
+       
+        cmds.popupMenu(p=self.widgets['customColorApplyButton'] )
+
+        cmds.menuItem(label= 'Apply only to SHAPE',
+                      command = partial(self.setCustomColor_VIEWPORT, value) )
+       
+            
+        cmds.menuItem(label= 'Apply only to OUTLINER',
+                      command = partial(self.setCustomColor_OUTLINER, value) )
+                      
+                      
+        colorButton = cmds.button(l="Delete", h=20, w=50, 
+                                  c=partial(delCustomColor, customColLay))
+
 
     
     def delCustomColor(colBtn, *args):
@@ -304,7 +349,8 @@ class MyWindow:
 
 
 
-
+    def printie(self, *args):
+        print:'ayuda'
     #este method es para el lio de crear y borrar la ventana cada vez
     def create(self):
         if cmds.window(self.window_id, exists=True):
@@ -471,9 +517,10 @@ class MyWindow:
         
         self.widgets['customColumnLayout'] = cmds.columnLayout()
         
+
         cmds.button (self.widgets['rgbSaveButton'],
                                                     e=True, 
-                                                    c=partial(saveColor, 
+                                                    c=partial(self.saveColor, 
                                                               self.widgets['customColumnLayout'], 
                                                               self.widgets['rgbSlider']))
         
