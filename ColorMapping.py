@@ -78,15 +78,6 @@ class ColorMapping(dict):
 
 
 
-
-
-
-
-
-
-
-
-
 class MyWindow:
     def __init__(self):
         self.window_title = 'Color Control'
@@ -104,7 +95,7 @@ class MyWindow:
     
     #WINDOW FUNCTIONS
 
-    def getIndexColor(slider, *args):
+    def getIndexColor_VIEWPORT(self, slider, *args):
         '''This function gets the slider value of the Index color and passes 
         it onto setIndexColor() function.
         @slider(str): String with the full name of the Index Color slider.
@@ -112,21 +103,29 @@ class MyWindow:
         
         value = cmds.colorIndexSliderGrp(slider, query=True, value=True)
         value = value - 1
-        print(value)
-        setIndexColor(value)
-    
-    def getRGBColor(slider, *args):
-        '''This function gets the slider value of the RGB color and passes it 
-        onto setIndexColor() function.
-        @slider(str): String with the full name of the RGB Color slider.
+        self.setIndexColor_VIEWPORT(value)
+        
+        
+    def getIndexColor_OUTLINER(self, slider, *args):
+        '''This function gets the slider value of the Index color and passes 
+        it onto setIndexColor() function.
+        @slider(str): String with the full name of the Index Color slider.
         '''
         
-        value = cmds.colorSliderGrp(slider, query=True, rgb=True)
-        print(value)
-        setRGBColor(value)
-
+        value = cmds.colorIndexSliderGrp(self.widgets['indexSlider'], query=True, value=True)
+        value = value - 1
+        self.setIndexColor_OUTLINER(value)
     
-    def setIndexColor(shpColor):
+    
+    def getIndexColor_SINGLEPRESS(self, slider, *args):
+        self.getIndexColor_VIEWPORT(slider)
+        self.getIndexColor_OUTLINER(slider)
+    
+    
+    
+    
+    
+    def setIndexColor_VIEWPORT(self, shpColor):
         '''Sets the color of a shape using Maya's Index colors.
         @shpColor(int): Index number of the color we want to set.
         '''
@@ -134,6 +133,7 @@ class MyWindow:
         # Save the selection
         selection = cmds.ls(sl=True) 
         i = 0
+
     
         # CHANGE SHAPE COLOR
         for obj in selection:
@@ -148,9 +148,78 @@ class MyWindow:
                 cmds.setAttr("{}.overrideRGBColors".format(shape), False)
                 cmds.setAttr("{}.overrideColor".format(shape), shpColor)
             i = i+1
+        
+        
+        
+        
+        
+    def setIndexColor_OUTLINER(self, shpColor):
+        '''Sets the color of a shape using Maya's Index colors.
+        @shpColor(int): Index number of the color we want to set.
+        '''
+    
+        # Save the selection
+        selection = cmds.ls(sl=True)
+        
+        index = cmds.colorIndexSliderGrp(self.widgets['indexSlider'], query=True, value=True) -1
+        colorOutliner = self.colors.get_rgb_from_index(index)
+        
+        print(colorOutliner)
+             
+
+        for s in selection:
+            cmds.setAttr('{}.useOutlinerColor'.format(s), True)
+            cmds.setAttr('{}.outlinerColor'.format(s), colorOutliner[0], colorOutliner[1], colorOutliner[2])    
     
     
-    def setRGBColor(shpColor, *args):
+    
+    
+    
+    
+    
+    
+    def getRGBColor_VIEWPORT(self, slider, *args):
+        '''This function gets the slider value of the RGB color and passes it 
+        onto setIndexColor() function.
+        @slider(str): String with the full name of the RGB Color slider.
+        '''
+        
+        value = cmds.colorSliderGrp(self.widgets['rgbSlider'], query=True, rgb=True)
+        print(value)
+        self.setRGBColor_VIEWPORT(value)
+
+
+ 
+    def getRGBColor_OUTLINER(self, slider, *args):
+        '''This function gets the slider value of the RGB color and passes it 
+        onto setIndexColor() function.
+        @slider(str): String with the full name of the RGB Color slider.
+        '''
+        
+        value = cmds.colorSliderGrp(self.widgets['rgbSlider'], query=True, rgb=True)
+        print(value)
+        self.setRGBColor_OUTLINER(value)
+
+
+    def getRGBColor_SINGLEPRESS(self, slider, *args):
+        self.getRGBColor_VIEWPORT (slider)
+        self.getRGBColor_OUTLINER (slider)
+   
+   
+   
+    
+    
+            
+            
+    
+
+    
+    
+    
+    
+    
+    
+    def setRGBColor_VIEWPORT(self, shpColor, *args):
         '''Sets the color of a shape using RGB colors.
         @shpColor(list): List with the 3 RGB values of the color we want 
                          to set.
@@ -176,6 +245,31 @@ class MyWindow:
                 cmds.setAttr("{}.overrideColorB".format(shape), shpColor[2])
             i = i + 1
             
+    
+    def setRGBColor_OUTLINER(self, shpColor, *args):
+        '''Sets the color of a shape using RGB colors.
+        @shpColor(list): List with the 3 RGB values of the color we want 
+                         to set.
+        '''
+        
+
+        selection = cmds.ls(sl=True)
+        
+        rgbColor = cmds.colorSliderGrp(self.widgets['rgbSlider'], query=True, rgb=True) 
+                     
+
+        for s in selection:
+            cmds.setAttr('{}.useOutlinerColor'.format(s), True)
+            cmds.setAttr('{}.outlinerColor'.format(s), rgbColor[0], rgbColor[1], rgbColor[2])
+    
+    
+    
+    
+    
+    
+    
+    
+    
     def saveColor(ml, slider, *args):
        '''This function saves the current value of the RGB slider and creates 
        a new set of buttons to apply or delete it.
@@ -184,7 +278,8 @@ class MyWindow:
        @slider(str): String with the full name of the RGB Color slider.
        '''
        
-       # Get the slider's value         value = cmds.colorSliderGrp(slider, query=True, rgb=True)
+       # Get the slider's value         
+       value = cmds.colorSliderGrp(slider, query=True, rgb=True)
        
        # Create the button set layout
        parent=ml 
@@ -255,7 +350,7 @@ class MyWindow:
        
         self.widgets['indexSlider'] = cmds.colorIndexSliderGrp (
             label= 'Index:',
-            min=0,
+            min=1,
             max=31,
             value=0,
             cw3 = (35, 30, 160),
@@ -290,17 +385,46 @@ class MyWindow:
         self.widgets['indexApplyButton'] = cmds.button(l="Apply", 
                                                        h=20, 
                                                        w=50, 
-                                                       c=partial(getIndexColor, self.widgets['indexSlider']) )
+                                                       c=partial(self.getIndexColor_SINGLEPRESS, self.widgets['indexSlider']) )
+        
+        
+        cmds.popupMenu(p=self.widgets['indexApplyButton'])
+        cmds.menuItem(
+                label= 'Apply only to SHAPE',
+                command = partial(self.getIndexColor_VIEWPORT, self.widgets['indexSlider'] ) )
+            
+        cmds.menuItem(
+                label= 'Apply only to OUTLINER',
+                command = partial(self.getIndexColor_OUTLINER, self.widgets['indexSlider']) )        
+        
+        
+        
+        
+        
         
         
         cmds.text(l='')
                 
+        
+        
+        
         self.widgets['rgbApplyButton'] = cmds.button(l="Apply", 
                                                     h=20, 
                                                     w=50, 
-                                                    c=partial(getRGBColor, self.widgets['rgbSlider']) )     
+                                                    c=partial(self.getRGBColor_SINGLEPRESS, self.widgets['rgbSlider']) )     
 
-        
+       
+       
+
+        cmds.popupMenu(p=self.widgets['rgbApplyButton'])
+
+        cmds.menuItem(
+                label= 'Apply only to SHAPE',
+                command = partial(self.getRGBColor_VIEWPORT, self.widgets['rgbSlider']) )
+            
+        cmds.menuItem(
+                label= 'Apply only to OUTLINER',
+                command = partial(self.getRGBColor_OUTLINER, self.widgets['rgbSlider']) )
         
         self.widgets['rgbSaveButton'] = cmds.button(l="Save", 
                                                     h=20, 
@@ -353,6 +477,8 @@ class MyWindow:
                                                               self.widgets['customColumnLayout'], 
                                                               self.widgets['rgbSlider']))
         
+           
+        
         cmds.setParent('..')        
         
                 
@@ -367,7 +493,7 @@ class MyWindow:
 
 
 
-    def on_button_press(self, buttonIndex, buttonColor, *args, **kwargs):
+    def on_button_press_SHELF(self, buttonIndex, buttonColor, *args, **kwargs):
 
         selectedControls = cmds.ls(sl=True)
 
@@ -378,7 +504,7 @@ class MyWindow:
             cmds.setAttr('{}.overrideEnabled'.format(s), True)
             cmds.setAttr('{}.overrideColor'.format(s), buttonIndex)
 
-
+        
 
 
 
@@ -416,7 +542,7 @@ class MyWindow:
 
 
                 #BUTTON PRESS
-                command = partial(self.on_button_press, index, colorOutliner)
+                command = partial(self.on_button_press_SHELF, index, colorOutliner)
             )
             cmds.popupMenu()
             cmds.menuItem(
