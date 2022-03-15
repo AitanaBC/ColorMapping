@@ -120,12 +120,16 @@ class MyWindow:
             mnb = False,
             mxb = False,
             toolbox = True,
-            widthHeight = (300,400)
+            widthHeight = (400,400)
         )
 
         #entre aquí y el show window metemos todos los elementos de la ui
-        mainFrameLayout = cmds.frameLayout('Color Sliders:', collapsable = True)
+        
+        mainLayout = cmds.columnLayout()
+               
+        slidersLayout = cmds.frameLayout('Color Sliders:', collapsable = True)
         cmds.separator(w=300, style='in')        
+                
         
 
         #SLIDERS INDEX SLIDER
@@ -139,7 +143,7 @@ class MyWindow:
             enable = True,
             
         )
-        cmds.button(l="Apply", h=20, w=50)
+        indexApplyButton = cmds.button(l="Apply", h=20, w=50)
 
         
         
@@ -148,7 +152,7 @@ class MyWindow:
         
         self.widgets['slider'] = cmds.colorSliderGrp (
             label= 'RGB Color:',
-            rgb = (0,0,1),
+            rgb = (0,0,0),
             cw3 = (65, 30, 72),
             enable = True,
             
@@ -157,25 +161,23 @@ class MyWindow:
         cmds.button(l="Save", h=20, w=50)     
 
 
-
-        cmds.rowColumnLayout(nc=4, cal=(1, 'right'), cw=(10, 35))
-        cmds.text(l="Index Colors", fn="boldLabelFont")
-        cmds.separator(w=300, style='in')
+        
+        
         cmds.setParent('..')
 
 
+        buttonsFrameLayout = cmds.frameLayout('Index Colors:', collapsable = True)
+        cmds.separator(w=300, style='in')  
 
-        cmds.rowColumnLayout(nc=4, cal=(1, 'right'), cw=(10, 35))
-        cmds.text(l="Custom Colors", fn="boldLabelFont")
-        cmds.separator(w=300, style='in')
-        cmds.setParent('..')
+
+
+
         
         #BUTTONS
         #creamos los botones usando la ColorMapping class que teníamos de antes,
         # le pasamos una variable self llamada self.colors al init de myWindow
         #que ejecute ColorMapping, en concreto el method get all color names, que ya nos los da ordenados
         #la función la metemos fuera del create, va aparte.
-        cmds.setParent('..')
 
         self.widgets['shelfLayout_buttons'] = cmds.shelfLayout(
             spacing=1,
@@ -183,6 +185,25 @@ class MyWindow:
         #Populate buttons function at the end of Create function
         self.populate_buttons()
 
+        
+
+
+
+
+        
+        cmds.setParent(mainLayout)        
+              
+        customFrameLayout = cmds.frameLayout('Custom Colors:', collapsable = True)
+        cmds.separator(w=300, style='in')
+        cmds.setParent('..')        
+        
+        
+        
+        
+        
+        
+        
+        
         #FIN DE LOS UI ELEMENTS
 
         cmds.showWindow(self.widgets['mainWindow'])
