@@ -335,11 +335,11 @@ class MyWindow:
                       
                       
         colorButton = cmds.button(l="Delete", h=20, w=50, 
-                                  c=partial(delCustomColor, customColLay))
+                                  c=partial(self.delCustomColor, customColLay))
 
 
     
-    def delCustomColor(colBtn, *args):
+    def delCustomColor(self, colBtn, *args):
         '''This function deletes the saved custom color.
         @colBtn(str): String with the full name of the button we want to 
                       delete.
@@ -398,7 +398,7 @@ class MyWindow:
             label= 'Index:',
             min=1,
             max=31,
-            value=0,
+            value=1,
             cw3 = (35, 30, 160),
             enable = True,
             
