@@ -117,62 +117,80 @@ class MyWindow:
             self.window_id,
             title= self.window_title,
             sizeable = False,
+            rtf = True,
             mnb = False,
             mxb = False,
             toolbox = True,
-            widthHeight = (400,400)
+            widthHeight = (300,300)
         )
 
         #entre aquí y el show window metemos todos los elementos de la ui
         
+        #---------------------------------------------------------------------
+        
         mainLayout = cmds.columnLayout()
+
+        #---------------------------------------------------------------------
                
         slidersLayout = cmds.frameLayout('Color Sliders:', collapsable = True)
-        cmds.separator(w=300, style='in')        
+        cmds.separator(w=300, style='in')    
+        
+        rowLayoutUI = cmds.rowLayout( bgc=(1,0,0), nc=3)
+        
+        
+        leftColumn = cmds.columnLayout( bgc=(0,0,1))
                 
         
 
         #SLIDERS INDEX SLIDER
-
         self.widgets['slider'] = cmds.colorIndexSliderGrp (
             label= 'Color Index:',
             min=0,
             max=31,
             value=0,
-            cw3 = (65, 30, 72),
+            cw3 = (65, 30, 130),
             enable = True,
             
         )
-        indexApplyButton = cmds.button(l="Apply", h=20, w=50)
 
         
-        
+        cmds.text(l='')
+        cmds.text(l='')
+
         
         #SLIDERS RGB SLIDER
         
         self.widgets['slider'] = cmds.colorSliderGrp (
             label= 'RGB Color:',
             rgb = (0,0,0),
-            cw3 = (65, 30, 72),
+            cw3 = (65, 30, 130),
             enable = True,
             
-        )   
-        cmds.button(l="Apply", h=20, w=50)     
-        cmds.button(l="Save", h=20, w=50)     
-
-
+        ) 
         
         
         cmds.setParent('..')
+        middleColumn = cmds.columnLayout(bgc=(0,0,0), cal='right') 
 
+        indexApplyButton = cmds.button(l="Apply", h=20, w=50)
+        cmds.text(l='')
+        
+        cmds.separator(w=10, style='in')
+        
+        cmds.button(l="Apply", h=20, w=50)     
+
+        cmds.button(l="Save", h=20, w=50)     
+        
+        
+        cmds.setParent('..')
+        cmds.setParent(mainLayout)
+
+        #---------------------------------------------------------------------
 
         buttonsFrameLayout = cmds.frameLayout('Index Colors:', collapsable = True)
         cmds.separator(w=300, style='in')  
 
 
-
-
-        
         #BUTTONS
         #creamos los botones usando la ColorMapping class que teníamos de antes,
         # le pasamos una variable self llamada self.colors al init de myWindow
@@ -181,6 +199,7 @@ class MyWindow:
 
         self.widgets['shelfLayout_buttons'] = cmds.shelfLayout(
             spacing=1,
+            height = 160,
         )
         #Populate buttons function at the end of Create function
         self.populate_buttons()
@@ -190,6 +209,7 @@ class MyWindow:
 
 
 
+        #---------------------------------------------------------------------
         
         cmds.setParent(mainLayout)        
               
