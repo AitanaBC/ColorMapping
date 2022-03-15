@@ -89,8 +89,8 @@ class ColorMapping(dict):
 
 class MyWindow:
     def __init__(self):
-        self.window_title = 'Color Mapper UI'
-        self.window_id = 'colorMapperUI'
+        self.window_title = 'Color Control'
+        self.window_id = 'colorControlUI'
         self.colors = ColorMapping()
 
         #creamos el dict donde ir metiendo todos los elementos de la ui
@@ -116,28 +116,60 @@ class MyWindow:
         self.widgets['mainWindow'] = cmds.window(
             self.window_id,
             title= self.window_title,
-            sizeable = True,
+            sizeable = False,
             mnb = False,
             mxb = False,
             toolbox = True,
-            widthHeight = (300,200)
+            widthHeight = (300,400)
         )
 
         #entre aquí y el show window metemos todos los elementos de la ui
-        cmds.frameLayout('')
+        mainFrameLayout = cmds.frameLayout('Color Sliders:', collapsable = True)
+        cmds.separator(w=300, style='in')        
+        
 
-        #SLIDER
+        #SLIDERS INDEX SLIDER
 
         self.widgets['slider'] = cmds.colorIndexSliderGrp (
-            label= 'Color Slider:',
+            label= 'Color Index:',
             min=0,
             max=31,
             value=0,
             cw3 = (65, 30, 72),
-            enable = True
+            enable = True,
+            
         )
+        cmds.button(l="Apply", h=20, w=50)
+
+        
+        
+        
+        #SLIDERS RGB SLIDER
+        
+        self.widgets['slider'] = cmds.colorSliderGrp (
+            label= 'RGB Color:',
+            rgb = (0,0,1),
+            cw3 = (65, 30, 72),
+            enable = True,
+            
+        )   
+        cmds.button(l="Apply", h=20, w=50)     
+        cmds.button(l="Save", h=20, w=50)     
 
 
+
+        cmds.rowColumnLayout(nc=4, cal=(1, 'right'), cw=(10, 35))
+        cmds.text(l="Index Colors", fn="boldLabelFont")
+        cmds.separator(w=300, style='in')
+        cmds.setParent('..')
+
+
+
+        cmds.rowColumnLayout(nc=4, cal=(1, 'right'), cw=(10, 35))
+        cmds.text(l="Custom Colors", fn="boldLabelFont")
+        cmds.separator(w=300, style='in')
+        cmds.setParent('..')
+        
         #BUTTONS
         #creamos los botones usando la ColorMapping class que teníamos de antes,
         # le pasamos una variable self llamada self.colors al init de myWindow
