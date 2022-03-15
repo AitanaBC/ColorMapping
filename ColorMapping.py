@@ -100,10 +100,112 @@ class MyWindow:
         #este create lo usamos para ejecutar el method que viene ahora, como __init__ se ejecuta siempre este también se ejecutará siempre
         self.create()
 
+    
+    
+    #WINDOW FUNCTIONS
 
+    def getIndexColor(slider, *args):
+        '''This function gets the slider value of the Index color and passes 
+        it onto setIndexColor() function.
+        @slider(str): String with the full name of the Index Color slider.
+        '''
+        
+        value = cmds.colorIndexSliderGrp(slider, query=True, value=True)
+        value = value - 1
+        print(value)
+        setIndexColor(value)
+    
+    def getRGBColor(slider, *args):
+        '''This function gets the slider value of the RGB color and passes it 
+        onto setIndexColor() function.
+        @slider(str): String with the full name of the RGB Color slider.
+        '''
+        
+        value = cmds.colorSliderGrp(slider, query=True, rgb=True)
+        print(value)
+        setRGBColor(value)
 
+    
+    def setIndexColor(shpColor):
+        '''Sets the color of a shape using Maya's Index colors.
+        @shpColor(int): Index number of the color we want to set.
+        '''
+        
+        # Save the selection
+        selection = cmds.ls(sl=True) 
+        i = 0
+    
+        # CHANGE SHAPE COLOR
+        for obj in selection:
+            # Verify and save the shapes in a list
+            if cmds.nodeType(selection[i]) == "transform":
+                shapeList = cmds.listRelatives(selection[i], c=1, s=1, f=1)
+            else:
+                shapeList.append(selection[i])
+            # Change the selected shapes colors
+            for shape in shapeList:
+                cmds.setAttr("{}.overrideEnabled".format(shape), True)
+                cmds.setAttr("{}.overrideRGBColors".format(shape), False)
+                cmds.setAttr("{}.overrideColor".format(shape), shpColor)
+            i = i+1
+    
+    
+    def setRGBColor(shpColor, *args):
+        '''Sets the color of a shape using RGB colors.
+        @shpColor(list): List with the 3 RGB values of the color we want 
+                         to set.
+        '''
+        
+        # Save the selection
+        selection = cmds.ls(sl=True) 
+        i = 0
+    
+        # CHANGE SHAPE COLOR
+        for obj in selection:
+            # Verify and save the shapes in a list
+            if cmds.nodeType(selection[i]) == "transform":
+                shapeList = cmds.listRelatives(selection[i], c=1, s=1, f=1)
+            else:
+                shapeList.append(selection[i])
+            # Change the selected shapes colors
+            for shape in shapeList:
+                cmds.setAttr("{}.overrideEnabled".format(shape), True)
+                cmds.setAttr("{}.overrideRGBColors".format(shape), True)
+                cmds.setAttr("{}.overrideColorR".format(shape), shpColor[0])
+                cmds.setAttr("{}.overrideColorG".format(shape), shpColor[1])
+                cmds.setAttr("{}.overrideColorB".format(shape), shpColor[2])
+            i = i + 1
+            
+    def saveColor(ml, slider, *args):
+       '''This function saves the current value of the RGB slider and creates 
+       a new set of buttons to apply or delete it.
+       @ml(str): String with the full name of the main layout to parent the 
+                 custom color buttons.
+       @slider(str): String with the full name of the RGB Color slider.
+       '''
+       
+       # Get the slider's value         value = cmds.colorSliderGrp(slider, query=True, rgb=True)
+       
+       # Create the button set layout
+       parent=ml 
+       customColLay = cmds.rowLayout(nc=2, cw2=(20, 600), cal=(2, "left"), 
+                    parent=ml)
+       cmds.text(l="", al=("left"))
+       savedClrsLayout = cmds.rowLayout(nc=3, cw=(23, 23), cal=(2, "right"))
+       colorButton = cmds.button(l="", h=20, w=100, bgc=value)
+       colorButton = cmds.button(l="Apply", h=20, w=50, 
+                   c=partial(setRGBColor, value))
+       colorButton = cmds.button(l="Delete", h=20, w=50, 
+                    c=partial(delCustomColor, customColLay))
 
-
+    
+    def delCustomColor(colBtn, *args):
+        '''This function deletes the saved custom color.
+        @colBtn(str): String with the full name of the button we want to 
+                      delete.
+        '''
+        
+        self = cmds.deleteUI(colBtn)
 
 
 
@@ -127,67 +229,94 @@ class MyWindow:
         #entre aquí y el show window metemos todos los elementos de la ui
         
         #---------------------------------------------------------------------
-        
-        mainLayout = cmds.columnLayout()
-
         #---------------------------------------------------------------------
-               
+
+        
+        self.widgets['mainLayout'] = cmds.columnLayout()
+
+        
+        #---------------------------------------------------------------------
+        #---------------------------------------------------------------------
+       
         slidersLayout = cmds.frameLayout('Color Sliders:', collapsable = True)
         cmds.separator(w=300, style='in')    
         
-        rowLayoutUI = cmds.rowLayout( bgc=(1,0,0), nc=3)
+        
+        #----------
+        rowLayoutUI = cmds.rowLayout(nc=3)
         
         
-        leftColumn = cmds.columnLayout( bgc=(0,0,1))
+        #
+        leftColumn = cmds.columnLayout()
                 
         
 
         #SLIDERS INDEX SLIDER
-        self.widgets['slider'] = cmds.colorIndexSliderGrp (
-            label= 'Color Index:',
+       
+        self.widgets['indexSlider'] = cmds.colorIndexSliderGrp (
+            label= 'Index:',
             min=0,
             max=31,
             value=0,
-            cw3 = (65, 30, 130),
+            cw3 = (35, 30, 160),
             enable = True,
             
         )
 
         
         cmds.text(l='')
+        cmds.separator(w=225, style='in')
+        
         cmds.text(l='')
 
-        
+
         #SLIDERS RGB SLIDER
         
-        self.widgets['slider'] = cmds.colorSliderGrp (
-            label= 'RGB Color:',
+        self.widgets['rgbSlider'] = cmds.colorSliderGrp (
+            label= 'RGB:',
             rgb = (0,0,0),
-            cw3 = (65, 30, 130),
+            cw3 = (35, 30, 160),
             enable = True,
             
         ) 
         
         
         cmds.setParent('..')
-        middleColumn = cmds.columnLayout(bgc=(0,0,0), cal='right') 
+        
+        
+        #
+        middleColumn = cmds.columnLayout() 
 
-        indexApplyButton = cmds.button(l="Apply", h=20, w=50)
+        self.widgets['indexApplyButton'] = cmds.button(l="Apply", 
+                                                       h=20, 
+                                                       w=50, 
+                                                       c=partial(getIndexColor, self.widgets['indexSlider']) )
+        
+        
         cmds.text(l='')
-        
-        cmds.separator(w=10, style='in')
-        
-        cmds.button(l="Apply", h=20, w=50)     
+                
+        self.widgets['rgbApplyButton'] = cmds.button(l="Apply", 
+                                                    h=20, 
+                                                    w=50, 
+                                                    c=partial(getRGBColor, self.widgets['rgbSlider']) )     
 
-        cmds.button(l="Save", h=20, w=50)     
         
+        
+        self.widgets['rgbSaveButton'] = cmds.button(l="Save", 
+                                                    h=20, 
+                                                    w=50,
+                                                    )     
         
         cmds.setParent('..')
-        cmds.setParent(mainLayout)
+        cmds.setParent(self.widgets['mainLayout'])
 
+        
+        #---------------------------------------------------------------------
         #---------------------------------------------------------------------
 
-        buttonsFrameLayout = cmds.frameLayout('Index Colors:', collapsable = True)
+
+        self.widgets['buttonsFrameLayout'] = cmds.frameLayout('Index Picker:', collapsable = True)
+
         cmds.separator(w=300, style='in')  
 
 
@@ -199,31 +328,36 @@ class MyWindow:
 
         self.widgets['shelfLayout_buttons'] = cmds.shelfLayout(
             spacing=1,
-            height = 160,
+            height = 150,
         )
         #Populate buttons function at the end of Create function
         self.populate_buttons()
-
         
-
-
+        cmds.setParent('..')
+        cmds.text(l='Rclic for options')
 
 
         #---------------------------------------------------------------------
-        
-        cmds.setParent(mainLayout)        
+        #---------------------------------------------------------------------
+
+        cmds.setParent(self.widgets['mainLayout'])        
               
-        customFrameLayout = cmds.frameLayout('Custom Colors:', collapsable = True)
+        self.widgets['customFrameLayout'] = cmds.frameLayout('Custom Library:', collapsable = True)
         cmds.separator(w=300, style='in')
+        
+        self.widgets['customColumnLayout'] = cmds.columnLayout()
+        
+        cmds.button (self.widgets['rgbSaveButton'],
+                                                    e=True, 
+                                                    c=partial(saveColor, 
+                                                              self.widgets['customColumnLayout'], 
+                                                              self.widgets['rgbSlider']))
+        
         cmds.setParent('..')        
         
+                
         
-        
-        
-        
-        
-        
-        
+
         #FIN DE LOS UI ELEMENTS
 
         cmds.showWindow(self.widgets['mainWindow'])
