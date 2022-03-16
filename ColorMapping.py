@@ -3,13 +3,26 @@
 
 #Aitana Belda VF013 Scripts II
 
+
+#------------------------------ EX 01 ---------------------------------#
+#                                                                      #
+#                           COLOR MAPPING                              #
+#                                                                      #
+#----------------------------------------------------------------------#
+
 import maya.cmds as cmds
 from functools import partial
 
 
-#DICTIONARY
+#----------------------------------------------------------------------#
+#                         DICTIONARY CLASS                             #   
+#----------------------------------------------------------------------#
+
 class ColorMapping(dict):
     def __init__(self):
+        
+        #Color data
+        
         self['data'] = {
             'gray':[0,(0.4,0.4,0.4)],
             'black':[1,(0,0,0)],
@@ -46,13 +59,26 @@ class ColorMapping(dict):
             }
 
 
-#creamos methods para recoger los diferentes valores del diccionario
+    #Defining methods to collect all necessary data
+    #from the dictionary
+    
+    #Get data from NAME
     def get_rgb_from_name(self, name):
         return self['data'][name][1]
 
     def get_index_from_name(self, name):
         return self['data'][name][0]
-
+    
+    def get_all_color_names(self):
+        return [
+        k
+        for k,v in sorted(self['data'].items(),
+        #data sorted via lambda - color index
+        key=lambda item: item[1] )
+        ]    
+    
+    
+    #Get data from INDEX
     def get_rgb_from_index(self, index):
         for c, data in self['data'].items():
             if data[0] == index:
@@ -63,42 +89,46 @@ class ColorMapping(dict):
             if data[0]== index:
                 return c
 
-#estamos usando el primer item del diccionario (el index) en el lambda para ordenar la lista que devuelva el method
-#lambda va con el sorted, es una manera entre otras de ordenar
-    def get_all_color_names(self):
-        return [
-        k
-        for k,v in sorted(self['data'].items(),
-        key=lambda item: item[1] )
-        ]
-
-#INTERFACES are the perfect place to use classes, empezamos definiendo la class de la ventana para el colormapper
 
 
 
+#----------------------------------------------------------------------#
+#                             UI CLASS                                 #   
+#----------------------------------------------------------------------#
 
 
-class MyWindow:
+class ColorMappingWindow:
+    
     def __init__(self):
         self.window_title = 'Color Control'
         self.window_id = 'colorControlUI'
         self.colors = ColorMapping()
 
-        #creamos el dict donde ir metiendo todos los elementos de la ui
 
+        #Dict containing all UI widgets
         self.widgets = dict()
 
-        #este create lo usamos para ejecutar el method que viene ahora, como __init__ se ejecuta siempre este también se ejecutará siempre
+        #Create the window via the create method below.
         self.create()
 
     
+    #WINDOW METHODS
+    #----------------------------------------------------------------------#
+    #----------------------------------------------------------------------#
     
-    #WINDOW FUNCTIONS
+    
+    #Used to get all data from diferent widgets and send it to other functions.
 
+
+    #INDEX Slider
+            #GETTING the color value and sending it to their respective functions.
+    
     def getIndexColor_VIEWPORT(self, slider, *args):
-        '''This function gets the slider value of the Index color and passes 
-        it onto setIndexColor() function.
-        @slider(str): String with the full name of the Index Color slider.
+        '''
+        This function gets the slider value of the INDEX slider and passes 
+        it onto setIndexColor_VIEWPORT() function.
+        It changes the SHAPE'S color, but not the outliner's.
+        Used for the ONLY VIEWPORT option in the pop-up menu.
         '''
         
         value = cmds.colorIndexSliderGrp(slider, query=True, value=True)
@@ -107,17 +137,22 @@ class MyWindow:
         
         
     def getIndexColor_OUTLINER(self, slider, *args):
-        '''This function gets the slider value of the Index color and passes 
-        it onto setIndexColor() function.
-        @slider(str): String with the full name of the Index Color slider.
+        '''This function gets the slider value of the INDEX slider and passes 
+        it onto setIndexColor_OUTLINER() function.
+        It changes the OUTLINER'S color, but not the shape's.
+        Used for the ONLY OUTLINER option in the pop-up menu.
         '''
         
-        value = cmds.colorIndexSliderGrp(self.widgets['indexSlider'], query=True, value=True)
+        value = cmds.colorIndexSliderGrp(slider, query=True, value=True)
         value = value - 1
         self.setIndexColor_OUTLINER(value)
     
     
     def getIndexColor_SINGLEPRESS(self, slider, *args):
+        '''
+        On APPLY button press, executes both functions so as to apply the color 
+        change to both OUTLINER and SHAPE.
+        '''
         self.getIndexColor_VIEWPORT(slider)
         self.getIndexColor_OUTLINER(slider)
     
@@ -125,6 +160,8 @@ class MyWindow:
     
     
     
+            #SETTING the color value for each option, outliner and shape.
+      
     def setIndexColor_VIEWPORT(self, shpColor):
         '''Sets the color of a shape using Maya's Index colors.
         @shpColor(int): Index number of the color we want to set.
@@ -492,7 +529,7 @@ class MyWindow:
 
         #BUTTONS
         #creamos los botones usando la ColorMapping class que teníamos de antes,
-        # le pasamos una variable self llamada self.colors al init de myWindow
+        # le pasamos una variable self llamada self.colors al init de ColorMappingWindow
         #que ejecute ColorMapping, en concreto el method get all color names, que ya nos los da ordenados
         #la función la metemos fuera del create, va aparte.
 
@@ -602,7 +639,7 @@ class MyWindow:
             )
 
 
-windowcm = MyWindow()
+windowcm = ColorMappingWindow()
 
 
 
