@@ -182,17 +182,10 @@ class ColorMappingWindow:
         i = 0
 
         # CHANGE SHAPE COLOR
-        for obj in selection:
-            # Verify and save the shapes in a list
-            if cmds.nodeType(selection[i]) == "transform":
-                shapeList = cmds.listRelatives(selection[i], c=1, s=1, f=1)
-            else:
-                shapeList.append(selection[i])
-            # Change the selected shapes colors
-            for shape in shapeList:
-                cmds.setAttr("{}.overrideEnabled".format(shape), True)
-                cmds.setAttr("{}.overrideRGBColors".format(shape), False)
-                cmds.setAttr("{}.overrideColor".format(shape), shpColor)
+        for shape in selection:
+            cmds.setAttr("{}.overrideEnabled".format(shape), True)
+            cmds.setAttr("{}.overrideRGBColors".format(shape), False)
+            cmds.setAttr("{}.overrideColor".format(shape), shpColor)
             i = i+1
 
         print ('Index Color ({}) set to SHAPE'.format(shpColor))
@@ -277,24 +270,15 @@ class ColorMappingWindow:
         
         # Save the selection
         selection = cmds.ls(sl=True) 
-        i = 0
-    
-        # CHANGE SHAPE COLOR
-        for obj in selection:
-            # Verify and save the shapes in a list
-            if cmds.nodeType(selection[i]) == "transform":
-                shapeList = cmds.listRelatives(selection[i], c=1, s=1, f=1)
-            else:
-                shapeList.append(selection[i])
-            # Change the selected shapes colors
-            for shape in shapeList:
-                cmds.setAttr("{}.overrideEnabled".format(shape), True)
-                cmds.setAttr("{}.overrideRGBColors".format(shape), True)
-                cmds.setAttr("{}.overrideColorR".format(shape), shpColor[0])
-                cmds.setAttr("{}.overrideColorG".format(shape), shpColor[1])
-                cmds.setAttr("{}.overrideColorB".format(shape), shpColor[2])
-            i = i + 1
-        
+
+        # Change the selected shapes colors
+        for shape in selection:
+            cmds.setAttr("{}.overrideEnabled".format(shape), True)
+            cmds.setAttr("{}.overrideRGBColors".format(shape), True)
+            cmds.setAttr("{}.overrideColorR".format(shape), shpColor[0])
+            cmds.setAttr("{}.overrideColorG".format(shape), shpColor[1])
+            cmds.setAttr("{}.overrideColorB".format(shape), shpColor[2])
+      
         print ('RGB Color ({}) set to SHAPE'.format(shpColor) )
             
     
@@ -344,23 +328,14 @@ class ColorMappingWindow:
     
     def setCustomColor_VIEWPORT(self, value, *args):
         selection = cmds.ls(sl=True) 
-        i = 0
     
-        # CHANGE SHAPE COLOR
-        for obj in selection:
-            # Verify and save the shapes in a list
-            if cmds.nodeType(selection[i]) == "transform":
-                shapeList = cmds.listRelatives(selection[i], c=1, s=1, f=1)
-            else:
-                shapeList.append(selection[i])
-            # Change the selected shapes colors
-            for shape in shapeList:
-                cmds.setAttr("{}.overrideEnabled".format(shape), True)
-                cmds.setAttr("{}.overrideRGBColors".format(shape), True)
-                cmds.setAttr("{}.overrideColorR".format(shape), value[0])
-                cmds.setAttr("{}.overrideColorG".format(shape), value[1])
-                cmds.setAttr("{}.overrideColorB".format(shape), value[2])
-            i = i + 1        
+        for shape in selection:
+            cmds.setAttr("{}.overrideEnabled".format(shape), True)
+            cmds.setAttr("{}.overrideRGBColors".format(shape), True)
+            cmds.setAttr("{}.overrideColorR".format(shape), value[0])
+            cmds.setAttr("{}.overrideColorG".format(shape), value[1])
+            cmds.setAttr("{}.overrideColorB".format(shape), value[2])
+      
 
    
     #Sets the custom color to both the OUTLINER and SHAPE
@@ -452,7 +427,8 @@ class ColorMappingWindow:
 
         #Main Column layout
         self.widgets['mainLayout'] = cmds.columnLayout()
-        
+        cmds.text(l='                     - Right clic for setting options -')
+        cmds.text(l='')
         
         #COLOR SLIDERS MENU
         #---------------------------------------------------------------------
@@ -574,7 +550,6 @@ class ColorMappingWindow:
         self.populate_buttons()
         
         cmds.setParent('..')
-        cmds.text(l='Rclic for options')
 
         cmds.setParent(self.widgets['mainLayout'])        
 
@@ -633,6 +608,7 @@ class ColorMappingWindow:
             cmds.setAttr('{}.outlinerColor'.format(s), buttonColor[0], buttonColor[1], buttonColor[2])
             #Shape
             cmds.setAttr('{}.overrideEnabled'.format(s), True)
+            cmds.setAttr("{}.overrideRGBColors".format(s), False)
             cmds.setAttr('{}.overrideColor'.format(s), buttonIndex)
         print('Set ({}) color to OUTLINER and SHAPE'.format(buttonColor))
 
@@ -650,9 +626,10 @@ class ColorMappingWindow:
 
         for s in selectedControls:
             cmds.setAttr('{}.overrideEnabled'.format(s), True)
+            cmds.setAttr("{}.overrideRGBColors".format(s), False)
             cmds.setAttr('{}.overrideColor'.format(s), buttonIndex)
         
-        print('Set ({}) color to SHAPE'.format(buttonColor))
+        print('Set ({}) color to SHAPE'.format(buttonIndex))
 
 
 
@@ -703,6 +680,8 @@ class ColorMappingWindow:
 
 
 StartColorControl = ColorMappingWindow()
+
+#End
 
 
 
